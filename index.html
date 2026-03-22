@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Para Ti — 21 de Marzo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,400;1,6..96,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400;1,600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#02000a;cursor:none}
+:root{
+  --void:#02000a;
+  --g0:#FFF9E6;--g1:#FFE97A;--g2:#FFD040;--g3:#C8900A;--g4:#8A5E00;--g5:#3D2600;
+  --rose:#FF9BAD;--cream:#FDF7EC;
+  --text:#F0EAD8;--textd:rgba(240,234,216,.55);
+}
+
+/* CURSOR */
+#cur{position:fixed;z-index:9999;pointer-events:none;transform:translate(-50%,-50%)}
+#cur-dot{width:8px;height:8px;background:var(--g1);border-radius:50%;
+  box-shadow:0 0 12px var(--g1),0 0 24px var(--g2)}
+#cur-ring{position:fixed;z-index:9998;pointer-events:none;
+  transform:translate(-50%,-50%);width:36px;height:36px;
+  border-radius:50%;border:1px solid rgba(255,208,64,.4);
+  transition:transform .2s ease}
+
+/* CANVAS */
+#c-bg,#c-dust,#c-rain{position:fixed;inset:0;pointer-events:none}
+#c-bg{z-index:0}#c-rain{z-index:5}#c-dust{z-index:600}
+
+/* GRAIN */
+#grain{position:fixed;inset:0;z-index:700;pointer-events:none;opacity:.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:160px 160px;animation:gm .9s steps(2) infinite}
+@keyframes gm{0%{transform:translate(0,0)}50%{transform:translate(-2px,1px)}100%{transform:translate(1px,-1px)}}
+
+/* VIGNETTE */
+#vig{position:fixed;inset:0;z-index:3;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 50%,transparent 30%,rgba(2,0,10,.82) 100%)}
+/* Fade inferior — separa poema de la flor */
+#fade-btm{position:fixed;bottom:0;left:0;right:0;height:260px;z-index:12;pointer-events:none;
+  background:linear-gradient(to top,rgba(2,0,10,1) 0%,rgba(2,0,10,.9) 35%,transparent 100%)}
+
+/* FRAME */
+.fr{position:fixed;z-index:4;pointer-events:none;border-color:rgba(200,144,10,.2);border-style:solid}
+#ftl{top:18px;left:18px;width:55px;height:55px;border-width:1px 0 0 1px}
+#ftr{top:18px;right:18px;width:55px;height:55px;border-width:1px 1px 0 0}
+#fbl{bottom:18px;left:18px;width:55px;height:55px;border-width:0 0 1px 1px}
+#fbr{bottom:18px;right:18px;width:55px;height:55px;border-width:0 1px 1px 0}
+.fline{position:fixed;z-index:4;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(200,144,10,.15),transparent);height:1px}
+#flt{top:0;left:0;right:0}#flb{bottom:0;left:0;right:0}
+
+/* PROGRESS */
+#prog{position:fixed;bottom:0;left:0;height:2px;z-index:500;width:0;
+  background:linear-gradient(90deg,var(--g5),var(--g3),var(--g2),var(--g1));
+  box-shadow:0 0 8px var(--g2);transition:width .9s ease}
+
+/* TRANSITION */
+#trans{position:fixed;inset:0;z-index:750;background:var(--void);
+  opacity:0;pointer-events:none;transition:opacity .9s ease}
+#trans.on{opacity:1;pointer-events:auto}
+
+/* ══ INTRO ══ */
+#intro{position:fixed;inset:0;z-index:800;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:0}
+#ibg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 58%,#0e0520 0%,var(--void) 68%)}
+
+.i-eyebrow{position:relative;z-index:1;font-family:'Cormorant Garamond',serif;
+  font-size:clamp(.62rem,1.2vw,.76rem);letter-spacing:.5em;text-transform:uppercase;
+  color:var(--g3);margin-bottom:36px;opacity:0;animation:rise 1.5s ease .6s forwards}
+
+.i-title{position:relative;z-index:1;font-family:'Bodoni Moda',serif;
+  font-size:clamp(3rem,9.5vw,7.5rem);color:var(--cream);text-align:center;
+  line-height:1.05;font-weight:400;font-style:italic;
+  opacity:0;animation:rise 2s ease 1s forwards}
+.i-title b{font-style:normal;font-weight:700;color:var(--g1);
+  text-shadow:0 0 80px rgba(255,208,64,.4),0 2px 0 rgba(100,60,0,.5)}
+
+.i-div{position:relative;z-index:1;width:0;height:1px;margin:44px auto;
+  background:linear-gradient(90deg,transparent,var(--g3),transparent);
+  opacity:0;animation:dexp 1.8s ease 2.1s forwards}
+@keyframes dexp{to{width:220px;opacity:.65}}
+
+.i-sub{position:relative;z-index:1;font-family:'Cormorant Garamond',serif;
+  font-size:clamp(.9rem,2.1vw,1.18rem);font-style:italic;color:var(--textd);
+  text-align:center;line-height:1.85;max-width:480px;padding:0 24px;
+  margin-bottom:56px;opacity:0;animation:rise 2s ease 2.5s forwards}
+
+.obtn{position:relative;z-index:1;background:transparent;border:none;cursor:none;
+  opacity:0;animation:rise 2s ease 3.1s forwards}
+.obtn-b{display:flex;align-items:center;gap:18px;padding:19px 54px;
+  border:1px solid rgba(255,208,64,.32);border-radius:80px;
+  font-family:'Cormorant Garamond',serif;font-size:clamp(.88rem,1.8vw,1.08rem);
+  letter-spacing:.24em;text-transform:uppercase;color:var(--g0);
+  background:linear-gradient(135deg,rgba(255,208,64,.03),rgba(255,208,64,.09));
+  backdrop-filter:blur(16px);
+  box-shadow:0 0 40px rgba(200,144,10,.09),inset 0 0 18px rgba(200,144,10,.04);
+  transition:all .6s cubic-bezier(.4,0,.2,1)}
+.obtn:hover .obtn-b{border-color:var(--g1);letter-spacing:.35em;
+  background:linear-gradient(135deg,rgba(255,208,64,.1),rgba(255,208,64,.2));
+  box-shadow:0 0 90px rgba(200,144,10,.38),0 0 160px rgba(200,144,10,.12),inset 0 0 28px rgba(200,144,10,.1)}
+.dmd{font-size:.68em;color:var(--g2);animation:spin 9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.ipart{position:absolute;border-radius:50%;pointer-events:none;background:var(--g2);
+  box-shadow:0 0 8px var(--g1);opacity:0;
+  animation:fp var(--d) ease-in-out var(--dl) infinite}
+@keyframes fp{
+  0%{opacity:0;transform:translateY(0) scale(0)}
+  20%{opacity:.5;transform:translateY(-30px) scale(1)}
+  80%{opacity:.2;transform:translateY(-110px) scale(.4)}
+  100%{opacity:0;transform:translateY(-160px) scale(0)}}
+
+/* ══ ESCENA ══ */
+#scene{position:fixed;inset:0;z-index:100;opacity:0;pointer-events:none;
+  overflow-y:auto;overflow-x:hidden;transition:opacity 1.5s ease}
+#scene.on{opacity:1;pointer-events:auto}
+
+/* ══ POEMA ══ */
+#poem{position:relative;
+  text-align:center;width:min(620px,86vw);z-index:20;
+  transition:opacity 2.2s ease,transform 2.2s ease}
+#poem.hide{opacity:0;transform:translateY(-20px);pointer-events:none}
+
+.v{display:block;font-family:'IM Fell English',serif;
+  font-size:clamp(1rem,2.6vw,1.44rem);color:var(--text);
+  line-height:2.05;opacity:0;transform:translateY(28px);
+  transition:opacity 2.3s cubic-bezier(.2,.8,.2,1),transform 2.3s cubic-bezier(.2,.8,.2,1)}
+.v.i{font-style:italic;color:rgba(240,234,216,.72)}
+.v.on{opacity:1;transform:translateY(0)}
+
+.vb{display:block;width:0;height:1px;margin:1.3em auto;
+  background:linear-gradient(90deg,transparent,var(--g3),transparent);
+  opacity:0;transition:width 2.2s ease,opacity 1.8s ease}
+.vb.on{width:140px;opacity:.45}
+
+.vc{display:block;font-family:'Bodoni Moda',serif;
+  font-size:clamp(1.8rem,5.5vw,3.4rem);color:var(--g1);
+  font-style:italic;font-weight:700;line-height:1.28;
+  margin-top:1.7em;opacity:0;transform:scale(.88) translateY(24px);
+  transition:opacity 3s ease,transform 3s cubic-bezier(.15,.85,.2,1);
+  text-shadow:0 0 60px rgba(255,208,64,.5),0 0 120px rgba(200,144,10,.25),0 2px 4px rgba(0,0,0,.6)}
+.vc.on{opacity:1;transform:scale(1) translateY(0)}
+
+.vs{display:block;font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(.74rem,1.5vw,.92rem);color:var(--g3);
+  letter-spacing:.22em;margin-top:.9em;opacity:0;transition:opacity 2.5s ease}
+.vs.on{opacity:1}
+
+/* ══ TULIPANES ══ */
+/* Contenedor fijo pegado al fondo, centrado */
+#flower{
+  position:fixed;
+  bottom:0; left:50%;
+  transform:translateX(-50%);
+  width:340px; height:460px;
+  z-index:8; pointer-events:none;
+  opacity:0; transition:opacity 2s ease;
+}
+#flower.show{ opacity:1; }
+
+/* Grupo de 3 tulipanes alineados al fondo */
+#tulips-group{
+  position:absolute;
+  bottom:0; left:50%;
+  transform:translateX(-50%);
+  width:340px; height:460px;
+}
+
+/* Cada tulipán: tallo + copa, anclados desde bottom:0 */
+.tulip{
+  position:absolute;
+  bottom:0;
+  display:flex; flex-direction:column; align-items:center;
+  opacity:0; transition:opacity 1.5s ease;
+}
+.tulip.show{ opacity:1; }
+
+/* Tallo crece desde abajo */
+.t-stem{
+  position:absolute; bottom:0;
+  width:7px; border-radius:4px;
+  background:linear-gradient(to top,#0a1e04 0%,#1e4010 40%,#2e6015 100%);
+  box-shadow:2px 0 4px rgba(0,0,0,.5), -1px 0 2px rgba(60,120,20,.2);
+  height:0;
+  transform-origin:bottom center;
+  transition:height 3.2s cubic-bezier(.4,0,.15,1) .5s;
+}
+.tulip.show .t-stem{ height:var(--sh); }
+
+/* Hoja */
+.t-leaf{
+  position:absolute;
+  bottom:var(--lb);
+  opacity:0;
+  transform:var(--lt0);
+  transition:opacity 1.2s ease 4.2s, transform 1.8s cubic-bezier(.34,1.5,.64,1) 4.2s;
+}
+.tulip.show .t-leaf{
+  opacity:1;
+  transform:var(--lt1);
+}
+
+/* Copa del tulipán: posición absoluta desde bottom */
+.t-cup{
+  position:absolute;
+  bottom:var(--cb);
+  left:50%;
+  transform:translateX(-50%) scale(0) rotate(var(--cr));
+  transform-origin:50% 100%;
+  transition:transform 2.4s cubic-bezier(.34,1.35,.64,1) var(--cd);
+}
+.tulip.show .t-cup{
+  transform:translateX(-50%) scale(1) rotate(0deg);
+}
+.tulip.show.bloomed .t-cup{
+  animation:tsway var(--sd) ease-in-out var(--sdl) infinite;
+}
+@keyframes tsway{
+  0%,100%{ transform:translateX(-50%) scale(1) rotate(0deg) translateY(0); }
+  35%    { transform:translateX(-50%) scale(1) rotate(var(--sr)) translateY(-8px); }
+  70%    { transform:translateX(-50%) scale(1) rotate(calc(var(--sr)*-.65)) translateY(-5px); }
+}
+
+/* Halo de luz detrás del tulipán central */
+.t-halo{
+  position:absolute; border-radius:50%; pointer-events:none;
+  bottom:var(--cb); left:50%; transform:translateX(-50%) translateY(50%);
+  background:radial-gradient(circle,rgba(255,220,80,.13) 0%,transparent 68%);
+  animation:hp 5s ease-in-out infinite;
+}
+@keyframes hp{
+  0%,100%{ transform:translateX(-50%) translateY(50%) scale(1); opacity:.45; }
+  50%    { transform:translateX(-50%) translateY(50%) scale(1.22); opacity:.9; }
+}
+
+/* Brillo estrella */
+.sparkle-star{
+  position:absolute; pointer-events:none; border-radius:50%; opacity:0;
+  background:var(--g1); box-shadow:0 0 6px var(--g1),0 0 14px var(--g2);
+  animation:ssp var(--sd2) ease-in-out var(--sdl2) infinite;
+}
+@keyframes ssp{
+  0%  { opacity:0; transform:translate(0,0) scale(0); }
+  30% { opacity:.85; transform:translate(var(--sx),var(--sy)) scale(1); }
+  100%{ opacity:0;  transform:translate(var(--ex),var(--ey)) scale(0); }
+}
+
+/* ══ CARTA FINAL ══ */
+#final{position:fixed;inset:0;z-index:200;opacity:0;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity 2.2s ease}
+#final.on{opacity:1;pointer-events:auto}
+
+.lw{position:relative;max-width:560px;width:90%;padding:64px 58px;text-align:center;
+  border:1px solid rgba(200,144,10,.18);
+  background:linear-gradient(155deg,rgba(22,12,5,.97),rgba(10,4,2,.99));
+  box-shadow:0 0 100px rgba(200,144,10,.07),0 0 0 1px rgba(200,144,10,.07),
+             inset 0 0 70px rgba(200,144,10,.025);
+  backdrop-filter:blur(24px)}
+.lw::before,.lw::after{content:'';position:absolute;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(200,144,10,.28),transparent);
+  height:1px;left:32px;right:32px}
+.lw::before{top:22px}.lw::after{bottom:22px}
+.lc2{position:absolute;width:26px;height:26px;border-color:rgba(200,144,10,.32);border-style:solid}
+.lc-tl{top:11px;left:11px;border-width:1px 0 0 1px}
+.lc-tr{top:11px;right:11px;border-width:1px 1px 0 0}
+.lc-bl{bottom:11px;left:11px;border-width:0 0 1px 1px}
+.lc-br{bottom:11px;right:11px;border-width:0 1px 1px 0}
+
+.le{display:block;font-family:'Cormorant Garamond',serif;
+  font-size:.72rem;letter-spacing:.48em;text-transform:uppercase;color:var(--g3);
+  margin-bottom:34px;opacity:0;animation:rise 1.5s ease .3s forwards}
+.lt{display:block;font-family:'Bodoni Moda',serif;
+  font-size:clamp(1.75rem,4vw,2.5rem);color:var(--g1);font-style:italic;
+  font-weight:700;line-height:1.22;text-shadow:0 0 40px rgba(255,208,64,.28);
+  margin-bottom:34px;opacity:0;animation:rise 1.8s ease .7s forwards}
+.lb{display:block;font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1rem,1.9vw,1.17rem);font-style:italic;color:var(--text);
+  line-height:2.1;margin-bottom:38px;opacity:0;animation:rise 2s ease 1.2s forwards}
+.lsi{display:block;font-family:'Bodoni Moda',serif;
+  font-size:clamp(1.05rem,2vw,1.35rem);color:var(--g0);letter-spacing:.04em;
+  opacity:0;animation:rise 2s ease 1.8s forwards}
+.ld{display:block;font-family:'Cormorant Garamond',serif;
+  font-size:.78rem;letter-spacing:.32em;color:var(--g4);margin-top:16px;
+  opacity:0;animation:rise 1.8s ease 2.3s forwards}
+
+@keyframes rise{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<audio id="bgm" loop preload="none">
+  <source src="nuestra_cancion.mp3" type="audio/mpeg">
+</audio>
+
+<div id="cur"><div id="cur-dot"></div></div>
+<div id="cur-ring"></div>
+<canvas id="c-bg"></canvas>
+<canvas id="c-rain"></canvas>
+<canvas id="c-dust"></canvas>
+<div id="grain"></div>
+<div id="vig"></div>
+<div id="fade-btm"></div>
+<div class="fr" id="ftl"></div><div class="fr" id="ftr"></div>
+<div class="fr" id="fbl"></div><div class="fr" id="fbr"></div>
+<div class="fline" id="flt"></div><div class="fline" id="flb"></div>
+<div id="prog"></div>
+<div id="trans"></div>
+
+<!-- ══════════ INTRO ══════════ -->
+<div id="intro">
+  <div id="ibg"></div>
+  <span class="i-eyebrow">21 de Marzo · Solo para ti</span>
+  <h1 class="i-title">El día que el<br>mundo escribió<br>tu <b>nombre</b></h1>
+  <div class="i-div"></div>
+  <p class="i-sub">Cada instante que respiro<br>te lleva de vuelta a mí.</p>
+  <button class="obtn" onclick="begin()">
+    <div class="obtn-b">
+      <span class="dmd">◆</span>
+      Abre tu regalo
+      <span class="dmd">◆</span>
+    </div>
+  </button>
+</div>
+
+<!-- ══════════ ESCENA ══════════ -->
+<div id="scene">
+
+  <div style="min-height:100vh;padding:5vh 20px 300px;display:flex;align-items:flex-start;justify-content:center;">
+  <div id="poem">
+    <span class="v"     id="v0">Hay flores que duran lo que dura el viento.</span>
+    <span class="v i"   id="v1">Hay palabras que se pierden sin ser dichas.</span>
+    <span class="vb"    id="b1"></span>
+    <span class="v"     id="v2">Pero tú —</span>
+    <span class="v i"   id="v3">tú eres la excepción a todas las leyes</span>
+    <span class="v"     id="v4">que el universo inventó para separarnos.</span>
+    <span class="vb"    id="b2"></span>
+    <span class="v"     id="v5">En cada silencio tuyo encuentro un poema.</span>
+    <span class="v i"   id="v6">En cada mirada tuya, un mundo entero</span>
+    <span class="v"     id="v7">que solo yo tengo el privilegio de habitar.</span>
+    <span class="vb"    id="b3"></span>
+    <span class="v"     id="v8">No necesito el infinito para sentirme completo.</span>
+    <span class="v i"   id="v9">Te tengo a ti,</span>
+    <span class="v"     id="v10">y eso ya es más que todo.</span>
+    <span class="vc"    id="vc">Feliz 21 de Marzo,<br>amor mío 💛</span>
+    <span class="vs"    id="vs">— escrito con el corazón, para el tuyo —</span>
+  </div>
+  </div><!-- /scroll wrapper -->
+
+  <!-- TULIPANES -->
+  <div id="flower">
+    <div id="tulips-group">
+
+      <!-- ── TULIPÁN IZQUIERDO (bajo, inclinado a la izq) ── -->
+      <div class="tulip" id="t-left"
+           style="left:28px;
+                  --sh:230px; --cb:222px; --cr:-14deg; --cd:3.6s;
+                  --sd:12s; --sdl:6.5s; --sr:2.5deg;
+                  --lb:95px;
+                  --lt0:translate(-54px,0) rotate(-25deg) scaleX(-1);
+                  --lt1:translate(-54px,-12px) rotate(-20deg) scaleX(-1);">
+        <div class="t-stem"></div>
+        <div class="t-leaf">
+          <svg width="62" height="26" viewBox="0 0 62 26">
+            <defs><linearGradient id="lgl" x1="0" y1=".5" x2="1" y2=".5">
+              <stop offset="0%" stop-color="#2a4c0e"/><stop offset="100%" stop-color="#3e6c1a"/>
+            </linearGradient></defs>
+            <path d="M0,13 C12,1 44,0 62,13 C44,25 12,26 0,13Z" fill="url(#lgl)"/>
+            <line x1="1" y1="13" x2="61" y2="13" stroke="rgba(0,0,0,.2)" stroke-width=".6"/>
+          </svg>
+        </div>
+        <div class="t-cup">
+          <svg width="66" height="100" viewBox="0 0 66 100">
+            <defs>
+              <linearGradient id="glL" x1=".5" y1="0" x2=".5" y2="1">
+                <stop offset="0%"   stop-color="#FFF2A0"/>
+                <stop offset="30%"  stop-color="#FFE030"/>
+                <stop offset="72%"  stop-color="#FFBA00"/>
+                <stop offset="100%" stop-color="#C07800"/>
+              </linearGradient>
+              <linearGradient id="glLs" x1=".15" y1="0" x2=".85" y2="1">
+                <stop offset="0%"   stop-color="rgba(255,255,210,.42)"/>
+                <stop offset="100%" stop-color="rgba(255,200,0,0)"/>
+              </linearGradient>
+              <filter id="fL"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="rgba(0,0,0,.52)"/></filter>
+            </defs>
+            <!-- pétalo izq exterior -->
+            <path d="M33,100 C14,90 2,66 4,40 C6,18 16,4 25,2 C30,1 33,5 33,11 L33,100Z"
+                  fill="url(#glL)" filter="url(#fL)" stroke="rgba(255,228,80,.22)" stroke-width=".8"/>
+            <!-- pétalo der exterior -->
+            <path d="M33,100 C52,90 64,66 62,40 C60,18 50,4 41,2 C36,1 33,5 33,11 L33,100Z"
+                  fill="url(#glL)" filter="url(#fL)" stroke="rgba(255,228,80,.22)" stroke-width=".8"/>
+            <!-- pétalo izq medio -->
+            <path d="M33,98 C22,82 10,60 12,38 C14,20 22,7 30,5 C32,4 33,7 33,12 L33,98Z"
+                  fill="url(#glL)" opacity=".82"/>
+            <!-- pétalo der medio -->
+            <path d="M33,98 C44,82 56,60 54,38 C52,20 44,7 36,5 C34,4 33,7 33,12 L33,98Z"
+                  fill="url(#glL)" opacity=".82"/>
+            <!-- pétalo central frontal -->
+            <path d="M33,96 C26,78 20,56 22,36 C24,20 30,8 33,7 L33,96Z"
+                  fill="url(#glL)" opacity=".68"/>
+            <path d="M33,96 C40,78 46,56 44,36 C42,20 36,8 33,7 L33,96Z"
+                  fill="url(#glL)" opacity=".68"/>
+            <!-- brillo interior -->
+            <path d="M33,94 C28,76 24,55 26,36 C28,21 32,9 33,8 L33,94Z" fill="url(#glLs)"/>
+            <!-- estambres -->
+            <line x1="33" y1="17" x2="27" y2="30" stroke="#3a1800" stroke-width="1.1" opacity=".65"/>
+            <line x1="33" y1="17" x2="33" y2="32" stroke="#3a1800" stroke-width="1.1" opacity=".65"/>
+            <line x1="33" y1="17" x2="39" y2="30" stroke="#3a1800" stroke-width="1.1" opacity=".65"/>
+            <circle cx="27" cy="30" r="2.2" fill="#2e1200" opacity=".75"/>
+            <circle cx="33" cy="32" r="2.2" fill="#2e1200" opacity=".75"/>
+            <circle cx="39" cy="30" r="2.2" fill="#2e1200" opacity=".75"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- ── TULIPÁN CENTRAL (el más alto, recto) ── -->
+      <div class="tulip" id="t-center"
+           style="left:50%; transform:translateX(-50%);
+                  --sh:320px; --cb:312px; --cr:-4deg; --cd:3s;
+                  --sd:9s; --sdl:5.5s; --sr:1.6deg;
+                  --lb:148px;
+                  --lt0:translate(56px,0) rotate(20deg);
+                  --lt1:translate(56px,-14px) rotate(16deg);">
+        <div class="t-stem"></div>
+        <!-- halo de luz -->
+        <div class="t-halo" style="--cb:312px;width:200px;height:200px;"></div>
+        <div class="t-leaf">
+          <svg width="72" height="28" viewBox="0 0 72 28">
+            <defs><linearGradient id="lgc" x1="1" y1=".5" x2="0" y2=".5">
+              <stop offset="0%" stop-color="#2a4c0e"/><stop offset="100%" stop-color="#3e6c1a"/>
+            </linearGradient></defs>
+            <path d="M0,14 C18,1 54,0 72,14 C54,27 18,28 0,14Z" fill="url(#lgc)"/>
+            <line x1="1" y1="14" x2="71" y2="14" stroke="rgba(0,0,0,.18)" stroke-width=".7"/>
+          </svg>
+        </div>
+        <div class="t-cup">
+          <svg width="84" height="126" viewBox="0 0 84 126">
+            <defs>
+              <linearGradient id="glC" x1=".5" y1="0" x2=".5" y2="1">
+                <stop offset="0%"   stop-color="#FFFBB0"/>
+                <stop offset="25%"  stop-color="#FFE84A"/>
+                <stop offset="65%"  stop-color="#FFCC00"/>
+                <stop offset="100%" stop-color="#CC8800"/>
+              </linearGradient>
+              <linearGradient id="glCs" x1=".12" y1="0" x2=".88" y2="1">
+                <stop offset="0%"   stop-color="rgba(255,255,220,.48)"/>
+                <stop offset="100%" stop-color="rgba(255,210,0,0)"/>
+              </linearGradient>
+              <filter id="fC">
+                <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="rgba(0,0,0,.44)"/>
+              </filter>
+            </defs>
+            <!-- pétalo izq exterior -->
+            <path d="M42,126 C20,114 4,86 6,52 C8,24 20,5 32,2 C37,1 42,6 42,13 L42,126Z"
+                  fill="url(#glC)" filter="url(#fC)" stroke="rgba(255,235,100,.25)" stroke-width="1"/>
+            <!-- pétalo der exterior -->
+            <path d="M42,126 C64,114 80,86 78,52 C76,24 64,5 52,2 C47,1 42,6 42,13 L42,126Z"
+                  fill="url(#glC)" filter="url(#fC)" stroke="rgba(255,235,100,.25)" stroke-width="1"/>
+            <!-- pétalo izq medio -->
+            <path d="M42,124 C30,108 16,80 18,50 C20,26 30,9 38,6 C41,5 42,8 42,14 L42,124Z"
+                  fill="url(#glC)" opacity=".86"/>
+            <!-- pétalo der medio -->
+            <path d="M42,124 C54,108 68,80 66,50 C64,26 54,9 46,6 C43,5 42,8 42,14 L42,124Z"
+                  fill="url(#glC)" opacity=".86"/>
+            <!-- pétalo central frente -->
+            <path d="M42,122 C34,104 26,78 28,50 C30,28 38,11 42,9 L42,122Z"
+                  fill="url(#glC)" opacity=".7"/>
+            <path d="M42,122 C50,104 58,78 56,50 C54,28 46,11 42,9 L42,122Z"
+                  fill="url(#glC)" opacity=".7"/>
+            <!-- brillo interior -->
+            <path d="M42,120 C36,102 30,77 32,50 C34,30 40,13 42,11 L42,120Z" fill="url(#glCs)"/>
+            <!-- estambres -->
+            <line x1="42" y1="20" x2="33" y2="37" stroke="#3e1a00" stroke-width="1.3" opacity=".7"/>
+            <line x1="42" y1="20" x2="42" y2="40" stroke="#3e1a00" stroke-width="1.3" opacity=".7"/>
+            <line x1="42" y1="20" x2="51" y2="37" stroke="#3e1a00" stroke-width="1.3" opacity=".7"/>
+            <circle cx="33" cy="37" r="2.8" fill="#2a1000" opacity=".8"/>
+            <circle cx="42" cy="40" r="2.8" fill="#2a1000" opacity=".8"/>
+            <circle cx="51" cy="37" r="2.8" fill="#2a1000" opacity=".8"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- ── TULIPÁN DERECHO (bajo, inclinado a la der) ── -->
+      <div class="tulip" id="t-right"
+           style="right:28px;
+                  --sh:248px; --cb:240px; --cr:13deg; --cd:3.9s;
+                  --sd:13s; --sdl:7.2s; --sr:-2.2deg;
+                  --lb:108px;
+                  --lt0:translate(52px,0) rotate(22deg);
+                  --lt1:translate(52px,-12px) rotate(18deg);">
+        <div class="t-stem"></div>
+        <div class="t-leaf">
+          <svg width="60" height="25" viewBox="0 0 60 25">
+            <defs><linearGradient id="lgr" x1="1" y1=".5" x2="0" y2=".5">
+              <stop offset="0%" stop-color="#2a4c0e"/><stop offset="100%" stop-color="#3a6018"/>
+            </linearGradient></defs>
+            <path d="M0,12 C12,1 42,0 60,12 C42,24 12,25 0,12Z" fill="url(#lgr)"/>
+            <line x1="1" y1="12" x2="59" y2="12" stroke="rgba(0,0,0,.2)" stroke-width=".6"/>
+          </svg>
+        </div>
+        <div class="t-cup">
+          <svg width="70" height="108" viewBox="0 0 70 108">
+            <defs>
+              <linearGradient id="glR" x1=".5" y1="0" x2=".5" y2="1">
+                <stop offset="0%"   stop-color="#FFF0A0"/>
+                <stop offset="32%"  stop-color="#FFD820"/>
+                <stop offset="72%"  stop-color="#FFC000"/>
+                <stop offset="100%" stop-color="#B87200"/>
+              </linearGradient>
+              <linearGradient id="glRs" x1=".15" y1="0" x2=".85" y2="1">
+                <stop offset="0%"   stop-color="rgba(255,255,200,.38)"/>
+                <stop offset="100%" stop-color="rgba(255,190,0,0)"/>
+              </linearGradient>
+              <filter id="fR"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="rgba(0,0,0,.5)"/></filter>
+            </defs>
+            <path d="M35,108 C16,98 3,74 5,46 C7,22 17,5 27,3 C32,1 35,5 35,11 L35,108Z"
+                  fill="url(#glR)" filter="url(#fR)" stroke="rgba(255,225,75,.2)" stroke-width=".8"/>
+            <path d="M35,108 C54,98 67,74 65,46 C63,22 53,5 43,3 C38,1 35,5 35,11 L35,108Z"
+                  fill="url(#glR)" filter="url(#fR)" stroke="rgba(255,225,75,.2)" stroke-width=".8"/>
+            <path d="M35,106 C25,90 12,66 14,44 C16,24 24,9 32,6 C34,5 35,8 35,12 L35,106Z"
+                  fill="url(#glR)" opacity=".82"/>
+            <path d="M35,106 C45,90 58,66 56,44 C54,24 46,9 38,6 C36,5 35,8 35,12 L35,106Z"
+                  fill="url(#glR)" opacity=".82"/>
+            <path d="M35,104 C28,87 22,64 24,43 C26,25 33,11 35,9 L35,104Z"
+                  fill="url(#glR)" opacity=".62"/>
+            <path d="M35,104 C42,87 48,64 46,43 C44,25 37,11 35,9 L35,104Z"
+                  fill="url(#glR)" opacity=".62"/>
+            <path d="M35,102 C30,86 26,64 28,44 C30,28 34,12 35,10 L35,102Z" fill="url(#glRs)"/>
+            <line x1="35" y1="18" x2="29" y2="31" stroke="#3a1800" stroke-width="1.1" opacity=".65"/>
+            <line x1="35" y1="18" x2="35" y2="33" stroke="#3a1800" stroke-width="1.1" opacity=".65"/>
+            <line x1="35" y1="18" x2="41" y2="31" stroke="#3a1800" stroke-width="1.1" opacity=".65"/>
+            <circle cx="29" cy="31" r="2.1" fill="#2e1200" opacity=".75"/>
+            <circle cx="35" cy="33" r="2.1" fill="#2e1200" opacity=".75"/>
+            <circle cx="41" cy="31" r="2.1" fill="#2e1200" opacity=".75"/>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CARTA FINAL -->
+  <!-- CARTA FINAL -->
+  <div id="final">
+    <div class="lw">
+      <div class="lc2 lc-tl"></div><div class="lc2 lc-tr"></div>
+      <div class="lc2 lc-bl"></div><div class="lc2 lc-br"></div>
+      <span class="le">Una carta para ti</span>
+      <span class="lt">Cada día me enamoro<br>de ti otra vez</span>
+      <span class="lb">
+        No hay palabras lo suficientemente grandes<br>
+        para todo lo que eres en mi vida.<br>
+        Pero hoy, en este día tan tuyo,<br>
+        solo quiero que sepas que eres<br>
+        <em>la razón más hermosa que tengo</em><br>
+        para sonreír cada mañana.
+      </span>
+      <span class="lsi">Con todo mi amor, hoy y siempre 💛</span>
+      <span class="ld">21 · III</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── CONFIG ──
+let W=innerWidth, H=innerHeight;
+let mx=-200,my=-200,rx=-200,ry=-200;
+let progress=0;
+
+// ── CURSOR ──
+const cur=document.getElementById('cur');
+const crng=document.getElementById('cur-ring');
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+  spawnDust(mx,my,2);
+});
+document.addEventListener('touchmove',e=>{
+  mx=e.touches[0].clientX;my=e.touches[0].clientY;
+  spawnDust(mx,my,4);
+},{passive:true});
+(function lp(){
+  rx+=(mx-rx)*.13;ry+=(my-ry)*.13;
+  crng.style.left=rx+'px';crng.style.top=ry+'px';
+  requestAnimationFrame(lp);
+})();
+
+// ── BACKGROUND: NEBULOSA + ESTRELLAS ──
+const bgC=document.getElementById('c-bg'),bx=bgC.getContext('2d');
+bgC.width=W;bgC.height=H;
+
+const stars=Array.from({length:170},()=>({
+  x:Math.random()*W,y:Math.random()*H,
+  r:Math.random()*1.5+.2,
+  a:Math.random()*.45+.05,
+  sp:.0004+Math.random()*.0022,
+  ph:Math.random()*Math.PI*2
+}));
+
+const nebs=Array.from({length:9},()=>({
+  x:Math.random()*W,y:Math.random()*H,
+  rx:170+Math.random()*290,ry:120+Math.random()*210,
+  h:Math.random()>.5?42:268,
+  a:.022+Math.random()*.032,
+  ph:Math.random()*Math.PI*2,
+  sp:.00012+Math.random()*.00022
+}));
+
+(function drawBG(){
+  bx.clearRect(0,0,W,H);
+  const t=Date.now()*.001;
+  nebs.forEach(n=>{
+    const px=n.x+Math.sin(t*.065+n.ph)*50;
+    const py=n.y+Math.cos(t*.048+n.ph)*34;
+    const pl=.78+Math.sin(t*n.sp*1000+n.ph)*.22;
+    bx.save();bx.translate(px,py);bx.scale(1,n.ry/n.rx);
+    const g=bx.createRadialGradient(0,0,0,0,0,n.rx*pl);
+    g.addColorStop(0,`hsla(${n.h},75%,46%,${n.a})`);
+    g.addColorStop(.42,`hsla(${n.h},55%,26%,${n.a*.38})`);
+    g.addColorStop(1,'transparent');
+    bx.fillStyle=g;bx.beginPath();bx.arc(0,0,n.rx*pl,0,Math.PI*2);bx.fill();bx.restore();
+  });
+  stars.forEach(s=>{
+    const a=s.a*(.55+.45*Math.sin(t*s.sp*1000+s.ph));
+    bx.beginPath();bx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    bx.fillStyle=`rgba(255,252,235,${a})`;
+    if(s.r>1.1){bx.shadowBlur=6;bx.shadowColor='rgba(255,225,100,.55)';}
+    bx.fill();bx.shadowBlur=0;
+  });
+  requestAnimationFrame(drawBG);
+})();
+
+// ── LLUVIA DE PÉTALOS ──
+const rC=document.getElementById('c-rain'),rx_=rC.getContext('2d');
+rC.width=W;rC.height=H;
+let petalOn=false;
+
+class FPetal{
+  constructor(){this.reset(true)}
+  reset(init=false){
+    this.x=Math.random()*W;
+    this.y=init?Math.random()*H:-30;
+    this.sz=4+Math.random()*9;
+    this.rot=Math.random()*Math.PI*2;
+    this.rs=(Math.random()-.5)*.045;
+    this.vx=(Math.random()-.5)*1.3;
+    this.vy=.55+Math.random()*1;
+    this.al=.25+Math.random()*.42;
+    this.h=Math.random()>.38?44:6;
+    this.sw=Math.random()*Math.PI*2;
+    this.swsp=.018+Math.random()*.022;
+  }
+  tick(){
+    this.sw+=this.swsp;
+    this.x+=this.vx+Math.sin(this.sw)*.9;
+    this.y+=this.vy;this.rot+=this.rs;
+    if(this.y>H+50)this.reset();
+  }
+  draw(c){
+    c.save();c.translate(this.x,this.y);c.rotate(this.rot);
+    c.globalAlpha=this.al;
+    c.beginPath();c.ellipse(0,0,this.sz*.32,this.sz,0,0,Math.PI*2);
+    const g=c.createLinearGradient(0,-this.sz,0,this.sz);
+    g.addColorStop(0,`hsl(${this.h},${this.h>20?92:65}%,${this.h>20?76:72}%)`);
+    g.addColorStop(1,`hsl(${this.h},${this.h>20?85:58}%,${this.h>20?50:52}%)`);
+    c.fillStyle=g;c.fill();c.restore();
+  }
+}
+
+const petals=Array.from({length:60},()=>new FPetal());
+(function drawRain(){
+  rx_.clearRect(0,0,W,H);
+  if(petalOn)petals.forEach(p=>{p.tick();p.draw(rx_);});
+  requestAnimationFrame(drawRain);
+})();
+
+// ── POLVO MÁGICO ──
+const dC=document.getElementById('c-dust'),dx=dC.getContext('2d');
+dC.width=W;dC.height=H;
+const dusts=[];
+
+class Dust{
+  constructor(x,y){
+    this.x=x;this.y=y;
+    this.r=Math.random()*3.2+.4;
+    this.vx=(Math.random()-.5)*3;
+    this.vy=-Math.random()*2.8-.3;
+    this.life=1;
+    this.dc=.013+Math.random()*.018;
+    this.h=36+Math.random()*26;
+  }
+  tick(){this.x+=this.vx;this.y+=this.vy;this.vy+=.042;this.vx*=.982;this.life-=this.dc;}
+  draw(c){
+    c.save();c.globalAlpha=Math.max(0,this.life);
+    c.fillStyle=`hsl(${this.h},96%,71%)`;
+    c.shadowBlur=10;c.shadowColor=`hsl(${this.h},100%,64%)`;
+    c.beginPath();c.arc(this.x,this.y,this.r,0,Math.PI*2);c.fill();c.restore();
+  }
+}
+function spawnDust(x,y,n=2){for(let i=0;i<n;i++)dusts.push(new Dust(x,y));}
+
+let lx_=0,ly_=0;
+document.addEventListener('mousemove',e=>{
+  const d=Math.hypot(e.clientX-lx_,e.clientY-ly_);
+  if(d>9){spawnDust(e.clientX,e.clientY,Math.min(5,Math.floor(d/14)));lx_=e.clientX;ly_=e.clientY;}
+});
+(function animDust(){
+  dx.clearRect(0,0,W,H);
+  for(let i=dusts.length-1;i>=0;i--){
+    dusts[i].tick();dusts[i].draw(dx);
+    if(dusts[i].life<=0)dusts.splice(i,1);
+  }
+  requestAnimationFrame(animDust);
+})();
+
+// ── TULIPANES: activar con stagger ──
+function showTulips(){
+  // El contenedor padre ya tiene la clase show en el #flower
+  // Los tulipanes individuales los mostramos escalonados
+  setTimeout(()=>document.getElementById('t-center').classList.add('show'), 200);
+  setTimeout(()=>document.getElementById('t-left').classList.add('show'),   800);
+  setTimeout(()=>document.getElementById('t-right').classList.add('show'),  1200);
+  setTimeout(()=>{
+    document.getElementById('t-center').classList.add('bloomed');
+    document.getElementById('t-left').classList.add('bloomed');
+    document.getElementById('t-right').classList.add('bloomed');
+  }, 7000);
+}
+
+// ── PROGRESS BAR ──
+const pb=document.getElementById('prog');
+function setP(v){pb.style.width=v+'%';}
+
+// ── SHOW HELPER ──
+function show(id,ms){
+  setTimeout(()=>{
+    const el=document.getElementById(id);
+    if(el)el.classList.add('on');
+    progress=Math.min(100,progress+7);
+    setP(progress);
+  },ms);
+}
+
+// ── INTRO PARTICLES ──
+const ibg=document.getElementById('ibg');
+for(let i=0;i<24;i++){
+  const p=document.createElement('div');
+  p.className='ipart';
+  const sz=1.8+Math.random()*4;
+  p.style.cssText=`width:${sz}px;height:${sz}px;left:${8+Math.random()*84}%;bottom:${-10+Math.random()*38}%;--d:${4.5+Math.random()*5}s;--dl:${Math.random()*7}s`;
+  ibg.appendChild(p);
+}
+
+// ── BEGIN ──
+function begin(){
+  const bgm=document.getElementById('bgm');
+  bgm.volume=.42;bgm.play().catch(()=>{});
+
+  const intro=document.getElementById('intro');
+  intro.style.transition='opacity 1.3s ease';intro.style.opacity='0';
+  setTimeout(()=>intro.style.display='none',1350);
+  setP(4);
+
+  setTimeout(()=>{
+    document.getElementById('scene').classList.add('on');
+    runPoem();
+  },850);
+}
+
+// ── SECUENCIA ──
+function runPoem(){
+  show('v0', 700);
+  show('v1', 3500);
+  show('b1', 5800);
+  show('v2', 7200);
+  show('v3', 9500);
+  show('v4',11800);
+  show('b2',13900);
+  show('v5',15300);
+  show('v6',17800);
+  show('v7',20200);
+  show('b3',22200);
+  show('v8',23700);
+  show('v9',26200);
+  show('v10',28500);
+
+  // Pétalos caen desde la mitad del poema
+  setTimeout(()=>petalOn=true, 13000);
+
+  // Flor empieza a crecer
+  setTimeout(()=>{
+    document.getElementById('flower').classList.add('show');
+    showTulips();
+  },27000);
+
+  // Clímax
+  show('vc',31500);
+  show('vs',34500);
+  setTimeout(()=>setP(88),31500);
+
+  // Transición a carta
+  setTimeout(()=>{
+    document.getElementById('poem').classList.add('hide');
+    setP(100);
+    setTimeout(()=>{
+      document.getElementById('final').classList.add('on');
+      for(let i=0;i<80;i++) setTimeout(()=>spawnDust(W/2,H*.55,7),i*35);
+    },2400);
+  },44000);
+}
+
+// Click en flor
+document.getElementById('flower').addEventListener('click',e=>{
+  for(let i=0;i<25;i++) setTimeout(()=>spawnDust(e.clientX,e.clientY,6),i*28);
+});
+
+// Resize
+window.addEventListener('resize',()=>{
+  W=innerWidth;H=innerHeight;
+  bgC.width=rC.width=dC.width=W;
+  bgC.height=rC.height=dC.height=H;
+});
+</script>
+</body>
+</html>
